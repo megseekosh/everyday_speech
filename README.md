@@ -1,5 +1,7 @@
 # everyday_speech
 
+(*under construction*)
+
 Code to replicate results from:
 
 Cychosz, M., Edwards, J. R., Romeo, R. R., Munson, B., &  Newman, R. N. (*under review*). Bursty, irregular speech input to preschoolers predicts vocabulary size. 
