@@ -2,17 +2,27 @@
 
 Code to replicate results from:
 
-Bursty, irregular speech input to preschoolers predicts vocabulary size. (*under review*) 
+(*authors removed for peer review*) Bursty, irregular speech input to preschoolers predicts vocabulary size. 
 
 # datasets
 
-* `dataframes/everyday_cds_ods.csv` - used in `burst_detection_v1.py` to compute measures of burstiness 
+* `dataframes/FACT_data_cleaned.csv` - contains demographic information for one of the corpora used
+ 
+* `dataframes/participantinfo_tp1-2.csv` - more demographic information
 
-* `dataframes/everyday_cds_ods_burstiness.csv` - dataframe to replicate child-directed speech results in  
+* `dataframes/ParticipantInfo_TP2.csv` - more demographic information
 
-* `dataframes/` - 
+* `dataframes/dialect_demo_info.csv` - more demographic information
+ 
+* `dataframes/mp_demo_info.csv` - more demographic information
 
-* `dataframes/` -
+* `dataframes/everyday_ctc.csv` - contains conversational turn measures used in supp. materials II
+
+* `dataframes/everyday_cds_ods.csv` - results from classifier that contains sleep and ODS; used in 1_modeling.Rmd to report statistics about sleep and ODS
+
+* `dataframes/sleep_cds_min.csv` - used in `1_modeling.Rmd` to clean naps from the ctc and speech dataframes that are used for supp. materials II and III
+
+* `dataframes/burstiness_compiled_results.csv` - burstiness metrics for every single recording based on CDS (not ODS), after naps have been removed; generated from `burst_detection_v1.py`
 
 # scripts to process LENA .its files
 #### Note that these scripts were adapted from scripts also located in the [HomeBank Git Repo](https://github.com/HomeBankCode)
@@ -32,18 +42,28 @@ Bursty, irregular speech input to preschoolers predicts vocabulary size. (*under
 
 * `2_name_files.py` - renames the .csv files generated from `1_pipeline.py`
 
-# modeling and scripts to replicate results
+# modeling and scripts to replicate results and supp. materials
   
-* `1_loading.Rmd` - process the .csv files for metadata, as well as measures reported in supplementary materials II and III
+* `0_loading.Rmd` - process the .csv files for metadata, as well as measures reported in supplementary materials II and III
 
-* `1_modeling.Rmd` - replicate the methods tables and results section in the manuscript, as well as supplementary materials II and III
+* `1_modeling.Rmd` - process the .csv files for child-directed speech and sleep removal; replicate the methods tables and results section in the manuscript, as well as supplementary materials II and III
 
-* `burst_detection_v1.py` - script to generate `dataframes/everyday_cds_ods_burstiness.csv` as well as timeseries plots of burstiness
+* `burst_detection_v1.py` - script to generate burstiness measures in child-directed speech report in `dataframes/everyday_cds_ods_burstiness.csv`; also generates timeseries plots of burstiness
 
+* `2_supp_materialsI.Rmd` - script to generate the table of children's language backgrounds in supplementary materials I
+
+* `3_supp_materialsIV.Rmd` - script to replicate the modeling of the relationship between nap durations and vocabulary size in supplementary materials IV
 
 # manuscript
 
-`manuscript.pdf`
+* `manuscript_anon.pdf`
 
-# extra scripts
+# Supplementary Materials
 
+* `supp_analysisI.pdf`
+
+* `supp_analysisII.pdf`
+
+* `supp_analysisIII.pdf`
+
+* `supp_analysisIV.pdf`
