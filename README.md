@@ -58,7 +58,7 @@ Code to replicate results from:
 
 * `manuscript_anon.pdf`
 
-# Supplementary Materials
+# supplementary materials
 
 * `supp_analysisI.pdf`
 
