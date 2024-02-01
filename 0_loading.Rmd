@@ -1,0 +1,167 @@
+---
+title: "Script to pre-process data for `Bursty, irregular speech input to preschoolers predicts vocabulary size'"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: 
+  bookdown::pdf_document2:
+    keep_tex: true
+indent: true
+toc: false
+header-includes:
+ \usepackage{float}
+ \floatplacement{figure}{H}
+---
+
+The code in this markdown will not be replicable outside of our lab environment because we are not publicly releasing the .its files. However, the compiled results (containing all of the information from the .its files) are released in dataframes so that the statistical modeling can be replicated. This script is where the .its files are analyzed and compiled. 
+
+```{r setup, include=FALSE}
+library('bookdown')
+library('knitr')
+library('dplyr')
+library('tidyverse')
+library('lubridate')
+library('gridExtra')
+library('stringr')
+
+opts_chunk$set(echo = TRUE,warning=FALSE,error=FALSE,message=FALSE)
+```
+
+```{r, load in LENA data, eval=FALSE}
+# note that numerous participants paused their recording so their its files
+# were manually updated with correct endtimes of the recording 
+
+# get LENA measures
+pre_its_df <- plyr::ldply( .data = list.files(pattern="*its_info.csv", # info about recording and child
+                                    recursive=TRUE),
+                    .fun = read.csv,colClasses=c("child_id"="character")) %>%
+  select(-X) %>%
+  mutate(corpus = substring(child_id, 4, 4)) %>% # create a variable for corpus  
+  select(-age_mos) # this appears to be wrongly reported for some bc of errors in data entry during data collection so we're going to recalculate age below
+
+
+R <- pre_its_df %>% 
+  filter(corpus=='R') %>% # timezone reported in GMT so we convert to EST and CST here 
+  mutate(startTimestamp = with_tz(ymd_hms(startClockTime, tz = "GMT"),"America/New_York"),
+         endTimeStamp = with_tz(ymd_hms(endClockTime, tz = "GMT"),"America/New_York")) 
+
+its_df <- pre_its_df %>% 
+  filter(corpus!='R') %>% 
+  filter(corpus!='E' & corpus!='J' & corpus!='A') %>% # remove kids from other corpora we're not looking at (e.g. CI users)
+  mutate(ResearchID=substr(child_id,1,4)) %>%
+  filter(!ResearchID %in% c('079L','605L','608L','665L','679L')) %>% # remove addtl kids w/ CIs 
+  select(-ResearchID) %>%
+  mutate(startTimestamp = with_tz(ymd_hms(startClockTime, tz = "GMT"),"America/Chicago"),
+         endTimeStamp = with_tz(ymd_hms(endClockTime, tz = "GMT"),"America/Chicago")) %>% 
+  rbind(., R) %>% 
+    mutate(date = date(startTimestamp),
+    startClockHours = hour(startTimestamp),  
+    startClockMinutes = minute(startTimestamp),
+    startClockSeconds = second(startTimestamp),
+    endClockHours = hour(endTimeStamp),
+    endClockMinutes = minute(endTimeStamp),  
+    endClockSeconds = second(endTimeStamp)) %>%
+    mutate(endTimeSecs_for_hours=case_when(endTimeSecs=='57599.99S' ~ "57600.00S",TRUE ~ endTimeSecs), # make sure 16-hour recordings are rounded correctly   
+    total_hrs=(as.numeric(substring(endTimeSecs_for_hours,1,nchar(endTimeSecs_for_hours)-1))/60)/60) %>%
+    mutate(startClockTotalSeconds = ((startClockHours*60)*60)+(60*startClockMinutes)+startClockSeconds) %>% # convert everything to seconds
+    mutate(DOB=gsub('/', '-', DOB)) %>% # replace DOB / with - 
+    mutate(DOB=case_when(DOB=='1-16-10'~'2010-01-16', # issues converting 2-digit year using lubridate so we do it by hand - ugh!
+                         DOB=='1-19-09'~'2009-01-19',
+                         DOB=='1-19-11'~'2011-01-19',
+                         DOB=='1-21-10'~'2010-01-21',
+                         DOB=='1-9-11'~'2011-01-09',
+                         DOB=='10-5-09'~'2009-10-05',
+                         DOB=='11-22-08'~'2008-11-22',
+                         DOB=='11-22-09'~'2009-11-22',
+                         DOB=='11-30-09'~'2009-11-30',
+                         DOB=='11-4-09'~'2009-11-4',
+                         DOB=='12-22-10'~'2010-12-22',
+                         DOB=='2-6-10'~'2010-02-06',
+                         DOB=='9-18-10'~'2010-09-18',
+                         DOB=='8-17-11'~'2011-08-17',
+                         DOB=='7-30-10'~'2010-07-30',
+                         DOB=='7-23-10'~'2010-07-23',
+                         DOB=='7-22-11'~'2011-07-22',
+                         DOB=='7-19-13'~'2013-07-13',
+                         DOB=='5-3-12'~'2012-05-03',
+                         DOB=='5-21-11'~'2011-05-21',
+                         DOB=='5-17-10'~'2010-05-17',
+                         DOB=='5-1-09'~'2009-05-01',
+                         DOB=='4-5-10'~'2010-04-05',
+                         DOB=='4-22-10'~'2010-04-22',
+                         DOB=='4-21-10'~'2010-04-21',
+                         DOB=='4-17-10'~'2010-04-17',
+                         DOB=='4-12-11'~'2011-04-12',
+                         DOB=='3-5-11'~'2011-03-05',
+                         DOB=='3-5-10'~'2010-02-05',
+                          .default = DOB)) %>%
+  mutate(age_interval=interval(ymd(as.Date(DOB)),ymd(date)),
+  age_mos = age_interval %/% months(1)) # now calculate child age
+
+its_df$child_id <- gsub('.it','',its_df$child_id)
+
+                                                                    
+                                                                   # note that we need to create 'hours' variable for *every* hour of the day (not just
+                                                                    # the ones with speech)
+                                                                    # in the consistency section below, I correctly impute missing time
+# load FAN and MAN separately
+FAN_df <- plyr::ldply( .data = list.files(pattern="FAN_timestamps.csv", 
+                                    recursive=TRUE, ignore.case = TRUE),
+                    .fun = read.csv) %>% 
+  select(-X) %>%
+  filter(duration<10) %>% 
+  mutate(hours = hour(seconds_to_period(seconds)), 
+         minutes = minute(seconds_to_period(seconds))) %>%
+ merge(., its_df, by=c('child_id')) %>%
+ mutate(avg_dB=avg_dB+97,
+        peak_dB=peak_dB+97)
+
+MAN_df <- plyr::ldply( .data = list.files(pattern="MAN_timestamps.csv", 
+                                    recursive=TRUE, ignore.case = TRUE),
+                    .fun = read.csv) %>% 
+  select(-X) %>%
+  filter(duration<10) %>% 
+  mutate(hours = hour(seconds_to_period(seconds)), 
+         minutes = minute(seconds_to_period(seconds))) %>%
+ merge(., its_df, by=c('child_id')) %>%
+ mutate(avg_dB=avg_dB+97,
+        peak_dB=peak_dB+97)
+
+pre_speech <- MAN_df %>% rbind(., FAN_df) 
+pre_speech$child_id <- gsub('.it','',pre_speech$child_id)
+
+
+pre_ctc <- plyr::ldply( .data = list.files(pattern="*CTC_timestamps.csv", 
+                                     recursive=TRUE, ignore.case = TRUE),
+                     .fun = read.csv,colClasses=c("child_id"="character")) %>%
+   select(-X) %>%
+   mutate(corpus = substring(child_id, 4, 4)) %>%
+   mutate(hours = hour(seconds_to_period(seconds)), 
+          minutes = minute(seconds_to_period(seconds))) %>%
+  merge(., its_df, by=c('corpus','child_id')) 
+
+# write the dataframes out for easy access
+write.csv(its_df, '../dataframes/everyday_its.csv')
+write.csv(pre_speech, '../dataframes/everyday_speech.csv')
+write.csv(pre_ctc, '../dataframes/everyday_ctc.csv')
+```
+
+```{r, load in CDS classified data, eval=FALSE}
+# load in the dataframes that contain CDS and sleep information
+
+pre_cds_df <- plyr::ldply( .data = list.files(pattern="*_cds.csv", # info about recording and child
+                                    recursive=TRUE),
+                    .fun = read.csv,colClasses=c("Id"="character")) 
+
+# merge the cds dataframe with .its
+pre_cds_df2 <- pre_cds_df %>%
+  rename(child_id=id) %>%
+  mutate(corpus = substring(child_id, 4, 4)) %>% # create a variable for corpus  
+  merge(., its_df, by=c('child_id','corpus'))  %>%
+  mutate(cds_pred = replace_na(cds_pred, 0), # enter 0s for sleep segments, instead of NA
+         cds_prob = replace_na(cds_prob, 0))
+
+# create another variable where AWC=0 for ODS segments
+cds_df <- pre_cds_df2 %>% 
+  mutate(AWC_COUNT_ODS=if_else(cds_pred=='0','0',AWC_COUNT)) # we consider there to be "no input" for non-CDS segments 
+
+write.csv(cds_df, '../dataframes/everyday_cds_ods.csv')
+```

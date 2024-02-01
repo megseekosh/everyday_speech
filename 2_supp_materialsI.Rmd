@@ -1,0 +1,57 @@
+---
+title: "Supp. Materials I for `Bursty, irregular speech input to preschoolers predicts vocabulary size'"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: 
+  bookdown::pdf_document2:
+    keep_tex: true
+indent: true
+toc: false
+header-includes:
+ \usepackage{float}
+ \floatplacement{figure}{H}
+---
+
+```{r setup, include=FALSE}
+library('ggplot2')
+library('bookdown')
+library('kableExtra')
+library('knitr')
+library('dplyr')
+library('tidyverse')
+
+opts_chunk$set(echo = TRUE,warning=FALSE,error=FALSE,message=FALSE)
+opts_knit$set(root.dir='/Users/megcychosz/Library/CloudStorage/Box-Box/box-group-lena-studies/its_dataframes/')
+```
+
+```{r, read in data}
+no_romeo <- c('108R','126R','132R','138R','148R','150R','152R','155R','156R','157R','178R') # Research IDs for the kids that don't have LENA 
+demo <- read.csv('../noise_pilotData/participant_info/Romeo_demo_info/FACT_data_cleaned.csv') %>%
+    mutate(link_id = substr(FACT_ID,6,8)) %>% # get child_id to link to LENA data
+    mutate(child_id = paste0(link_id,'RTP1')) %>% 
+    mutate(ResearchID=paste0(link_id,'R')) %>%
+    filter(!ResearchID %in% no_romeo) %>% # remove the kids w/o LENA
+    mutate(PPVT_Age=Age*12) %>% # convert to mos
+    mutate(Race=recode(as.factor(Race),
+                      `1`='american_indian_alaskan_native',
+                      `2`='asian',
+                      `3`='native_hawaiian_pacific_islander',
+                      `4`='black',
+                      `5`='white',
+                      `6`='more_than_one_race',
+                      `7`='unknown')) %>%
+    mutate(Ethnicity=recode(as.factor(Ethnicity),
+                      `1`='not_hispanic',
+                      `2`='hispanic',
+                      `3`='unknown')) %>%
+  distinct(ResearchID, .keep_all = T)
+```
+
+```{r, create table with language backgrounds}
+multi_cts <- demo %>%
+  count(Multilingual) %>%
+  mutate(total_children=sum(n)) 
+
+lang_cts <- demo %>%
+  count(Other_language)
+```
+
