@@ -35,7 +35,7 @@ Code to replicate results from:
 
 * `get_speech_clips.py` - extract data about ambient speech from LENA .its files (FAN, MAN) for use in supp. materials III
 
-* `get_CTC_clips.py` - same as above, but to get counts and timestamps of converstational turns for use in supp. materials II
+* `get_CTC_info.py` - same as above, but to get counts and timestamps of converstational turns for use in supp. materials II
 
 # scripts to prepare .its files for the sleep and child-directed speech classifier
 #### SPOGLab research assistant Madurya Suresh assisted with this analysis!
