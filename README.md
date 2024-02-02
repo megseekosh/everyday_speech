@@ -18,6 +18,10 @@ Code to replicate results from:
 
 * `dataframes/everyday_ctc.csv` - contains conversational turn measures used in supp. materials II
 
+* `dataframes/everyday_speech.csv` - contains male and female speech measures used in supp. materials III
+
+* `dataframes/everyday_its.csv` - contains metadata about each recording
+
 * `dataframes/everyday_cds_ods.csv` - results from classifier that contains sleep and ODS; used in 1_modeling.Rmd to report statistics about sleep and ODS
 
 * `dataframes/sleep_cds_min.csv` - used in `1_modeling.Rmd` to clean naps from the ctc and speech dataframes that are used for supp. materials II and III
