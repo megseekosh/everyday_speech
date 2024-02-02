@@ -18,7 +18,7 @@ Code to replicate results from:
 
 * `dataframes/everyday_ctc.csv` - contains conversational turn measures used in supp. materials II
 
-* `dataframes/everyday_speech.csv` - contains male and female speech measures used in supp. materials III (this dataframe is actually too large to share easily on Git, so we share a smaller example so you can see its internal structure)
+* `dataframes/everyday_speech_limited.csv` - contains male and female speech measures used in supp. materials III (this dataframe is actually too large to share easily on Git, so we share a smaller example so you can see its internal structure)
 
 * `dataframes/everyday_its.csv` - contains metadata about each recording
 
