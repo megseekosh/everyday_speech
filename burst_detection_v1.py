@@ -62,7 +62,7 @@ for child in real_data['child_id'].unique():
 
 
     for time in range(len(ynew)):
-        if ynew[time] > 3*std: # pretty sure this is where he classifies bursts 
+        if ynew[time] > 3*std: 
             bursts[time] = ynew[time]
 
     mean_burst_amplitude = np.mean(bursts[~np.isnan(bursts)])
