@@ -2,7 +2,7 @@
 
 Code to replicate results from:
 
-(*authors removed for peer review*) Bursty, irregular speech input to preschoolers predicts vocabulary size. 
+Cychosz, M., Romeo, R. R., Edwards, J., & Newman, R. S. (Accepted). Bursty, irregular speech input to preschoolers predicts vocabulary size. *Developmental Science*. 
 
 # datasets
 #### you'll need to unzip this directory
@@ -63,14 +63,14 @@ Code to replicate results from:
 
 # manuscript
 
-* `manuscript_anon.pdf`
+* `manuscript.pdf`
 
 # supplementary materials
 
-* `supp_analysisI.pdf`
+* `supp_materialsI.pdf`
 
-* `supp_analysisII.pdf`
+* `supp_materialsII.pdf`
 
-* `supp_analysisIII.pdf`
+* `supp_materialsIII.pdf`
 
-* `supp_analysisIV.pdf`
+* `supp_materialsIV.pdf`
