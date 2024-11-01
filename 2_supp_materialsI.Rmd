@@ -1,5 +1,5 @@
 ---
-title: "Supp. Materials I for `Bursty, irregular speech input to preschoolers predicts vocabulary size'"
+title: "Supp. Materials I for `Bursty, irregular speech input to children predicts vocabulary size'"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output: 
   bookdown::pdf_document2:
@@ -24,12 +24,18 @@ opts_knit$set(root.dir='/Users/megcychosz/Library/CloudStorage/Box-Box/box-group
 ```
 
 ```{r, read in data}
+# read in the list of recordings used, so we can filter by this
+record_list <- read.csv('../noise_pilotData/everyday_speech/dataframes/record_list.csv') %>%
+  mutate(ResearchID=substr(child_id,1,4)) %>%
+  distinct(ResearchID, .keep_all = T) # keep only those IDs for kids we actually have recordings from 
+
 no_romeo <- c('108R','126R','132R','138R','148R','150R','152R','155R','156R','157R','178R') # Research IDs for the kids that don't have LENA 
-demo <- read.csv('../noise_pilotData/participant_info/Romeo_demo_info/FACT_data_cleaned.csv') %>%
+romeo_demo <- read.csv('../noise_pilotData/participant_info/Romeo_demo_info/FACT_data_cleaned.csv') %>%
     mutate(link_id = substr(FACT_ID,6,8)) %>% # get child_id to link to LENA data
     mutate(child_id = paste0(link_id,'RTP1')) %>% 
     mutate(ResearchID=paste0(link_id,'R')) %>%
     filter(!ResearchID %in% no_romeo) %>% # remove the kids w/o LENA
+    merge(., record_list, by='ResearchID') %>% #limit to just the kids that we analyzed in the actual results 
     mutate(PPVT_Age=Age*12) %>% # convert to mos
     mutate(Race=recode(as.factor(Race),
                       `1`='american_indian_alaskan_native',
@@ -43,15 +49,133 @@ demo <- read.csv('../noise_pilotData/participant_info/Romeo_demo_info/FACT_data_
                       `1`='not_hispanic',
                       `2`='hispanic',
                       `3`='unknown')) %>%
-  distinct(ResearchID, .keep_all = T)
+  distinct(ResearchID, .keep_all = T) 
+
+l2t_demo <- read.csv('../noise_pilotData/participant_info/ParticipantInfo_TP2.csv') %>%
+    select(ResearchID, PPVT_Age, maternal_education_level_revised, AAE, Race, Ethnicity) %>%
+    rename(maternal_education_level=maternal_education_level_revised,
+           AAE_Native=AAE)
+
+dial <- read.csv('../noise_pilotData/participant_info/dialect_demo_info/dialect_demo_info_AAE.csv') %>%
+    select(child_id, PPVT_Age, maternal_education_level, AAE_Native, Race, Ethnicity) %>%
+    rename(ResearchID=child_id)
+
+mp <- read.csv('../noise_pilotData/participant_info/mp_demo_info/mp_demo_info_AAE.csv') %>%
+    select(child_id, PPVT_Age, maternal_education_level, AAE_Native, Race, Ethnicity) %>%
+    rename(ResearchID=child_id)
+
+l2t_demo_complete <- l2t_demo %>%
+  rbind(., dial) %>%
+  rbind(., mp) %>%
+  merge(., record_list, by='ResearchID') #limit to just the kids that we analyzed in the actual results 
 ```
 
-```{r, create table with language backgrounds}
-multi_cts <- demo %>%
+```{r, sanity check}
+num_child <- nrow(l2t_demo_complete) + nrow(romeo_demo)
+print(paste('There should be 292 children and there are', num_child))
+```
+
+```{r, get info for table with language backgrounds}
+# TODO: double check table in supp materials I
+multi_cts <- romeo_demo %>%
   count(Multilingual) %>%
   mutate(total_children=sum(n)) 
 
-lang_cts <- demo %>%
+multi_cts2 <- l2t_demo_complete %>%
+  count(AAE_Native) %>%
+  mutate(total_children=sum(n)) 
+
+lang_cts <- romeo_demo %>%
   count(Other_language)
+```
+
+```{r, check for confounds by race, ethnicity, and SES, eval=FALSE}
+# are there significant effects of age on SES?
+romeo <- read.csv('../noise_pilotData/everyday_speech/dataframes/romeo_demo.csv') %>%
+  merge(romeo_demo, by=c('maternal_education_level','ResearchID','Female')) %>%
+  distinct(ResearchID, .keep_all = T) %>%
+  mutate(multi=if_else(Multilingual>1,'1','0')) %>% # bc 1=mono in her corpus so we recode
+  select(multi, ResearchID, maternal_education_level,Female) 
+
+l2t <- read.csv('../noise_pilotData/everyday_speech/dataframes/l2t_demo.csv') %>%
+  merge(l2t_demo_complete, by=c('maternal_education_level','ResearchID')) %>%
+  select(AAE_Native, ResearchID, maternal_education_level,Female) %>%
+  distinct(ResearchID, .keep_all = T) %>%
+  rename(multi=AAE_Native) %>%
+  rbind(., romeo) 
+
+all_kids <- read.csv('../noise_pilotData/everyday_speech/dataframes/child_list.csv') %>%
+  merge(., l2t, by=c('maternal_education_level', 'ResearchID')) %>%
+  select(ResearchID, age_mos, multi, maternal_education_level,Female) %>%
+  distinct(ResearchID, .keep_all = T) %>% # 292 kids
+  mutate(maternal_education_level=as.factor(maternal_education_level)) 
+
+# compute the proportion of kids who have mothers with less than a college degree 
+mat_analysis <- all_kids %>%
+  mutate(bin_mated=if_else(maternal_education_level>4,'high','low')) %>%
+  mutate(age_yrs=round(age_mos / 12)) %>%
+  count(age_yrs,bin_mated) %>%
+  filter(age_yrs!='7') # there's only 1 seven year old so remove
+
+total_counts <- aggregate(n ~ age_yrs, data = mat_analysis, sum)
+mat_analysis2 <- mat_analysis[!is.na(mat_analysis$bin_mated),]
+high_counts <- aggregate(n ~ age_yrs, data = mat_analysis2[mat_analysis2$bin_mated == 'high',], sum)
+proportion_high <- merge(total_counts, high_counts, by = "age_yrs", all.x = TRUE)
+proportion_high$proportion <- proportion_high$n.y / proportion_high$n.x
+
+m<-proportion_high %>% lm(proportion~age_yrs, data=.) 
+```
+
+```{r, create a table that de-aggregates race, ethnicity and SES}
+# mat ed on the x-axis on top and race/ethnicity along the side 
+
+rom_for_tbl <- romeo_demo %>%
+  select(maternal_education_level, Race, Ethnicity) 
+
+df_for_tbl <- l2t_demo_complete %>%
+  select(maternal_education_level, Race, Ethnicity) %>%
+  rbind(., rom_for_tbl)
+
+deag_tbl_race <- df_for_tbl %>%
+  select(maternal_education_level, Race) %>%
+  filter(maternal_education_level!='NA' & (Race!='NA' & Race!='no_response'& Race!='unknown')) %>%
+  mutate(total_kids=n()) # how many kids do we have combined info for?
+
+total_kids_r <- deag_tbl_race$total_kids[1]
+
+deag_tbl_race2 <- deag_tbl_race %>%
+  count(maternal_education_level, Race) %>%
+  mutate(percen=n/total_kids_r,
+         stat=paste0(n,'(',round(percen*100,2),')')) %>%
+  spread(maternal_education_level, value=stat) %>%
+  select(-n,-percen)
+
+kable(deag_tbl_race2, booktabs=T, 
+            caption= "Race and SES",
+            row.names = FALSE) %>% 
+  kable_styling() %>%
+  kableExtra::kable_styling(latex_options = "hold_position")
+
+deag_tbl_eth <- df_for_tbl %>%
+  select(maternal_education_level, Ethnicity) %>%
+  filter(maternal_education_level!='NA' & (Ethnicity!='NA' & Ethnicity!='unknown')) %>%
+  mutate(total_kids=n())  # how many kids do we have combined info for?
+
+total_kids <- deag_tbl_eth$total_kids[1]
+
+deag_tbl_eth2 <- deag_tbl_eth %>%
+  count(maternal_education_level, Ethnicity) %>%
+  mutate(percen=n/total_kids,
+         stat=paste0(n,'(',round(percen*100,2),')')) %>%
+  spread(maternal_education_level, value=stat) %>%
+  select(-n,-percen)
+
+
+kable(deag_tbl_eth2, booktabs=T, 
+            caption= "Ethnicity and SES",
+            row.names = FALSE) %>% 
+  kable_styling() %>%
+  kableExtra::kable_styling(latex_options = "hold_position")
+
 ```
 

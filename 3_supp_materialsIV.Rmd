@@ -1,5 +1,5 @@
 ---
-title: "Supp. Materials IV for `Bursty, irregular speech input to preschoolers predicts vocabulary size'"
+title: "Supp. Materials IV for `Bursty, irregular speech input to children predicts vocabulary size'"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output: 
   bookdown::pdf_document2:
@@ -71,10 +71,11 @@ sleep_cds_model<- sleep_cds %>%
   select(Female, maternal_education_level, age_mos, PPVT_GSV, ResearchID, child_id, date) %>%
   merge(., sleep_cds_dur, by='child_id') %>%
   filter(age_mos<42) %>%
-  mutate(sleep_dur_mins2 = if_else((sleep_dur_mins==5), 0, sleep_dur_mins)) %>% # if a child only has 1 epoch of sleep, we assume it's unlikely to be a true nap, or really much of a rest at all (the results are the same whether or not we take this step)
-    mutate(mat_ed_centered=center_scale(maternal_education_level),
+  #mutate(sleep_dur_mins2 = if_else((sleep_dur_mins==5), 0, sleep_dur_mins)) %>% # if a child only has 1 epoch of sleep, we assume it's unlikely to be a true nap, or really much of a rest at all (the results are the same whether or not we take this step)
+  #rename(sleep_dur_mins2=sleep_dur_mins) %>%
+  mutate(mat_ed_centered=center_scale(maternal_education_level),
            age_mos_centered=center_scale(age_mos),
-           sleep_dur_mins_centered=center_scale(sleep_dur_mins2))
+           sleep_dur_mins_centered=center_scale(sleep_dur_mins))
 
 
 # remove recordings that had any component recorded overnight since we are interested in naps
@@ -85,7 +86,8 @@ sleep_cds_model2 <- sleep_cds %>%
   distinct(child_id, .keep_all = T) %>%
   filter(end_date2==start_date) %>% # remove the rows where the dates don't match as this indicates that part of the recording took place while the child was sleeping
   select(child_id) %>% # list of recordings we'll be keeping
-  merge(., sleep_cds_model, by='child_id')
+  merge(., sleep_cds_model, by='child_id') %>% 
+  filter(sleep_dur_mins>0) # remove all 0-minute naps 
 ```
 
 ```{r, fit the model}
@@ -98,11 +100,16 @@ sleep_sum <- summary(sleep_m1)
 mean(sleep_cds_model2$sleep_dur_mins)
 sd(sleep_cds_model2$sleep_dur_mins)
 range(sleep_cds_model2$sleep_dur_mins)
+
+# how many unique children?
+num_child <- sleep_cds_model2 %>%
+  distinct(ResearchID) %>%
+  nrow()
 ```
 
-Here we evaluate the relationship between nap duration and concurrent vocabulary size. We first removed recordings that did not contain any sleep (N=3). We could not reliably distinguish between potential overnight sleep and naptimes, so we then removed all recordings that had any component recorded overnight to be maximally conservative. We also limited the analysis to children under 42 months who we assumed would still be taking daily naps. Finally, if a child only had 1 isolated epoch (5-minute segment) of sleep, we did not consider this to be a true ``nap'' (our modeling results were the same whether or not we took this data cleaning step). This resulted in N=124 remaining recordings from N=115 children. 
+Here we evaluate the relationship between nap duration and concurrent vocabulary size. We first removed recordings that did not contain any sleep (N=3). We could not reliably distinguish between potential overnight sleep and naptimes, so we then removed all recordings that had any component recorded overnight to be maximally conservative. We also limited the analysis to children under 42 months who we assumed would still be taking daily naps. This resulted in N=115 remaining recordings from N=108 children. 
 
-To model the relationship between nap duration and concurrent vocabulary size, we fit a baseline linear mixed effects model to predict children's vocabulary size for the N=114 children. The baseline model included a random intercept for child and fixed effects of Child Age (in months, centered and scaled), Maternal Education (centered and scaled), and Child Gender (contrast coded). To this model we added an effect of Nap Duration (centered and scaled) which improved upon the baseline model ($\chi$^2=`r round(sleep_test$Chisq[2],2)`, p=.03). The model summary is listed in Table 1. There was a significant, positive relationship between nap duration and concurrent vocabulary ($\beta$=`r round(sleep_sum$coefficients[5,1],4)`, p=.03), suggesting that children who tend to take longer naps may have larger receptive vocabularies.
+To model the relationship between nap duration and concurrent vocabulary size, we fit a baseline linear mixed effects model to predict children's vocabulary size for the N=115 recordings. The baseline model included a random intercept for child and fixed effects of Child Age (in months, centered and scaled), Maternal Education (centered and scaled), and Child Gender (contrast coded). To this model we added an effect of Nap Duration (centered and scaled) which improved upon the baseline model ($\chi$^2=`r round(sleep_test$Chisq[2],2)`, p=.048). The model summary is listed in Table 1. There was a significant, positive relationship between nap duration and concurrent vocabulary ($\beta$=`r round(sleep_sum$coefficients[5,1],4)`, p=.03), suggesting that children who tend to take longer naps may have larger receptive vocabularies.
 
 ```{r, nap model summary }
 nap_m <- lme4::lmer(PPVT_GSV~age_mos_centered+Female+mat_ed_centered+sleep_dur_mins_centered+(1|ResearchID), data=sleep_cds_model2)  
