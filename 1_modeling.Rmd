@@ -12,24 +12,24 @@ header-includes:
 ---
 
 ```{r setup, include=FALSE}
-library('ggplot2')
-library('bookdown')
-library('lmerTest')
-library('kableExtra')
-library('lme4')
-library('knitr')
-library('dplyr')
-library('tidyverse')
-library('lubridate')
-library('zoo')
-library('gridExtra')
-library('stringr')
-library('viridis')
-library('broom')
-library('tibble')
-library('zoo')
-library('stargazer')
-library('effects')
+library('ggplot2')  #3.4.3
+library('bookdown') #0.35
+library('lmerTest') #3.1.3
+library('kableExtra') #1.3.4
+library('lme4') #1.1.35.2
+library('knitr')  #1.44
+library('dplyr') #1.1.3
+library('tidyverse') #2.0.0
+library('lubridate') #1.9.3
+library('zoo') #1.8.12
+library('gridExtra') #2.3
+library('stringr') #1.5.0
+library('viridis') #0.6.4
+library('broom') #1.0.5
+library('tibble') #3.2.1
+library('zoo') #1.8.12
+library('stargazer') #5.2.3
+library('effects') #4.2.2
 
 opts_chunk$set(echo = TRUE,warning=FALSE,error=FALSE,message=FALSE)
 
