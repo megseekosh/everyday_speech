@@ -63,7 +63,7 @@ pre_romeo_demo <- read.csv('FACT_data_cleaned.csv') %>%
 
 
 # get a dataframe with childIDs and ResearchIDs
-ids <- read.csv('../dataframes/everyday_ctc.csv') %>%
+ids <- read.csv('dataframes/everyday_ctc.csv') %>%
     select(-X) %>%
     mutate(ResearchID=substr(child_id,1,4)) %>%
     distinct_at(., vars(ResearchID, child_id))
@@ -74,7 +74,7 @@ romeo_demo <- pre_romeo_demo %>%
   select(child_id, ResearchID, PPVT_GSV,PPVT_Age,maternal_education_level,Female,Race,Ethnicity)
 
 
-tp1_vocab <- read.csv('participantinfo_tp1-2.csv') %>% 
+tp1_vocab <- read.csv('dataframes/participantinfo_tp1-2.csv') %>% 
   mutate(child_id = paste0(ResearchID,'TP1')) %>% 
   select(child_id, ResearchID, Study, PPVT_GSV, PPVT_Age) 
 
@@ -91,13 +91,13 @@ tp1_complete <- l2t_demo %>% merge(., tp1_vocab, by='ResearchID')
 tp2_complete <- l2t_demo %>% merge(., l2t_vocab, by='ResearchID') 
 
 # kids from dialect switch study
-dial <- read.csv('dialect_demo_info.csv') %>%
+dial <- read.csv('dataframes/dialect_demo_info.csv') %>%
     select(child_id, PPVT_GSV, PPVT_Age, Female, maternal_education_level, Race, Ethnicity) %>%
     mutate(ResearchID=child_id) %>%
     mutate(Study='dialect')
 
 # kids from Mispron study
-mated <- read.csv('mp_demo_info.csv') %>%
+mated <- read.csv('dataframes/mp_demo_info.csv') %>%
     select(child_id, PPVT_GSV, PPVT_Age, Female, maternal_education_level, Race, Ethnicity) %>%
     mutate(ResearchID=child_id) %>%
     mutate(Study="mated")
@@ -109,16 +109,16 @@ l2t_demo <- tp1_complete %>%
   rbind(., dial) %>%
   rbind(., mated)
 
-write.csv(romeo_demo, '../dataframes/romeo_demo.csv')
-write.csv(l2t_demo, '../dataframes/l2t_demo.csv')
+write.csv(romeo_demo, 'dataframes/romeo_demo.csv')
+write.csv(l2t_demo, 'dataframes/l2t_demo.csv')
 ```
 
 ```{r, read in LENA data,cache=TRUE}
 # dataframes containing LENA data
-its_df <- read.csv('../dataframes/everyday_its.csv') %>%
+its_df <- read.csv('dataframes/everyday_its.csv') %>%
   select(-X)
 
-pre_ctc <- read.csv('../dataframes/everyday_ctc.csv') %>%
+pre_ctc <- read.csv('dataframes/everyday_ctc.csv') %>%
     select(-X)
 
 pre_ctc_romeo <- pre_ctc %>%
@@ -135,7 +135,7 @@ ctc_df <- pre_ctc_romeo %>%
   mutate(mins = (seconds/60)) %>% # divide by 60 (to get minutes) and round to the nearest 5
   mutate(epochs=round(mins/5)*5)
 
-pre_speech <- read.csv('../dataframes/everyday_speech.csv') %>%
+pre_speech <- read.csv('dataframes/everyday_speech.csv') %>%
     select(-X)
 
 pre_speech_romeo <- pre_speech %>%
@@ -151,7 +151,7 @@ speech_df <- pre_speech_romeo %>%
   rbind(pre_speech_l2t) 
 
 # the LENA dataframes with CDS info
-pre_pre_cds <- read.csv('../dataframes/everyday_cds_ods.csv') %>%
+pre_pre_cds <- read.csv('dataframes/everyday_cds_ods.csv') %>%
   filter(cds_pred=='1') %>% # select only those epochs that are predicted to contain CDS
   filter(corpus!='E' & corpus!='J' & corpus!='A') %>% # remove Jessica's kids and kids w CIs (E & A)
   filter(!child_id %in% c('679LTP1','679LTP2','665LTP1','665LTP2','608LTP1','608LTP2','605LTP2','605LTP1', '079LTP1')) %>% # remove addtl kids w/ CIs
@@ -243,14 +243,14 @@ sleep_cds_min_df <- plyr::ldply( .data = list.files(pattern="*CDS_classified.csv
   mutate(onset=Duration_Secs*segment,
          offset=onset+60) # compute absolute onset timestamp; all clips are 60 seconds
 
-write.csv(sleep_cds_min_df, '../dataframes/sleep_cds_min.csv')
+write.csv(sleep_cds_min_df, 'dataframes/sleep_cds_min.csv')
 ```
 
 ```{r, remove naps,cache=TRUE}
 # naps have already been removed from the cds dataframe (by epochs, not minutes as they will be here)
 # so this is just for speech and CTC dataframes
 
-sleep_df <- read.csv('../dataframes/sleep_cds_min.csv') %>%
+sleep_df <- read.csv('dataframes/sleep_cds_min.csv') %>%
   mutate(corpus = substring(id, 4, 4)) %>% # create a variable for corpus  
   filter(corpus!='E' & corpus!='J' & corpus!='A') %>% # remove Jessica's kids and kids w CIs (E & A)
   filter(!id %in% c('679LTP1','679LTP2','665LTP1','665LTP2','608LTP1','608LTP2','605LTP2','605LTP1', '079LTP1')) # remove addtl kids w/ CIs 
@@ -483,7 +483,7 @@ cds_df2 <- cds_df %>%
 # this dataframe was generated with burst_detection_v1.py
 # bursts were calculated over AWC words in 5-minute CDS segments with naps removed
 researchid <- cds_df %>% select(child_id,ResearchID)
-burst_df <- read.csv('../dataframes/burstiness_compiled_results.csv') %>%
+burst_df <- read.csv('dataframes/burstiness_compiled_results.csv') %>%
   merge(., researchid, by='child_id') # get researchID
 
 # merge it with the demographic data
@@ -898,86 +898,4 @@ stargazer(turn_model,
 
 # Supp. Materials III: overall speech analysis
 
-Here we define input using the adult word counts from LENA's linguistic unit algorithm. That is, we do not distinguish between speech directed to the child versus someone else (child-directed speech versus other-directed speech). We examine whether burstiness in *overall speech input* (directed and overheard) also relates to children's receptive vocabulary sizes. 
-
-```{r, prepare to compute the burstiness of overall speech input}
-# compute the percentage of minutes in the child's day with > 1 AW 
-
-time_steps <- rep(seq(60,57600,60),times=555) %>% as.data.frame() 
-time_steps$seconds <- time_steps$.
-ids <- speech_df %>% distinct(child_id) 
-ids_repeat <- rep(ids$child_id,960) %>% as.data.frame()
-ids_repeat$child_id <- ids_repeat$.
-time_steps_demo <- ids_repeat %>%
-  arrange(child_id) %>%
-  select(-.) %>%
-  cbind(., time_steps) %>%
-  select(child_id, seconds)
-
-pre_input_consis_speech <- speech_df %>%
-  select(child_id, seconds, age_mos, duration, total_hrs, wordCount, clip_onset, segment_type) %>% 
-  merge(., time_steps_demo, by=c('seconds', 'child_id'),all=TRUE) %>% # impute the missing seconds
-  replace_na(list(duration = 0, wordCount=0)) # replace the imputed time stamps with 0 adult words and 0 duration
-
-input_consis_speech <- pre_input_consis_speech %>%
-  group_by(child_id, seconds) %>%
-  summarize(adult_words = sum(wordCount)) # total num of words/minute
-```
-
-```{r, boolean to classify each minute as bursty or not}
-speech_burst <- input_consis_speech %>%
-  group_by(child_id) %>%
-  mutate(mad_words=mad(adult_words)) %>% # for each child compute the median absolute deviation of words
-  ungroup() %>%
-  mutate(bursty=if_else(adult_words>mad_words*3, "bursty", "not_bursty")) %>%
-  filter(bursty=='bursty') %>% # only looking at bursty minutes
-  group_by(child_id) %>%
-  summarize(avg_amp_speech=mean(adult_words),.groups = 'keep') # compute word amplitude as the average # of words within bursty minutes
-  
-# re-merge with vocabulary information
-speech_burst2 <- burst_df2 %>%
-  distinct_at(., vars(child_id, PPVT_GSV, Female, mat_ed_centered,age_mos_centered,ResearchID,avg_hrly_words_centered)) %>%
-  merge(., speech_burst, by='child_id')
-```
-
-```{r, compute descriptive statistics about bursty overall speech}
-speech_burst_stats <- speech_burst2 %>%
-  summarize(mean_amp=mean(avg_amp_speech),
-            sd_amp=sd(avg_amp_speech),
-            min_amp=min(avg_amp_speech),
-            max_amp=max(avg_amp_speech))
-```
-
-```{r, modeling relationship between bursty overall speech and vocabulary}
-burst_speech_m3 <- lmer(PPVT_GSV~avg_amp_speech+age_mos_centered+Female+mat_ed_centered+avg_hrly_words_centered+(1|ResearchID),data=speech_burst2) 
-
-burst_speech_m3_sum <- summary(burst_speech_m3)
-```
-
-## Data pre-processing
-
-We wrote an ad-hoc script to mine the .its file associated with each LENA recording and provide us with the number of words from adults within each minute of the recording. The word count was estimated from LENA's linguistic unit algorithm, which has been reported on widely elsewhere in the literature. We imputed "empty" minutes (epochs without any adult words) for each recording, to reflect the times when the child was not exposed to any words. In this supplementary analysis, we limited the computation to burst amplitude, since we didn't see large differences between burst amplitude and duration in the child-directed speech analysis in the full manuscript so we didn't think that overall speech input burst amplitude and duration would differ that much from one another. The average amplitude of bursty overall speech within the recordings was `r round(speech_burst_stats$mean_amp,2)` words (SD=`r round(speech_burst_stats$sd_amp,2)`, range=`r paste0(round(speech_burst_stats$min_amp,2),'-',round(speech_burst_stats$max_amp,2))`). (Note that in the manuscript we performed additional interpolation and actually looked at 30-second increments, not 60-second as we do here.)
-
-## Model fitting
-
-We fit a linear mixed effects model to predict receptive vocabulary scores (Peabody Picture Vocabulary Test-5 growth scale values) and included random intercepts of Child. We additionally included fixed effects of Child Age (in months, centered and scaled), Maternal Education (binned, as described in the manuscript, and centered and scaled), and Child Gender (contrast coded). The variable of interest was the average amplitude (number of adult words) within bursty minutes, which did not predict vocabulary scores ($\beta$=`r round(burst_speech_m3_sum$coefficients[2,1],2)`, p=`r round(burst_speech_m3_sum$coefficients[2,5],2)`; model summary in Table 1). This analysis supports the idea that bursty overall *child-directed speech* input, is positively related to concurrent receptive vocabulary scores. However, this same effect on vocabulary may not be present for the overall speech that children are exposed to (other-directed, overheard, etc.).
-
-```{r, bursty overall speech and vocabulary model}
-speech_model <- lme4::lmer(PPVT_GSV~avg_amp_speech+age_mos_centered+Female+mat_ed_centered+avg_hrly_words_centered+(1|ResearchID),data=speech_burst2)  
-stargazer(speech_model,
-            model.names=FALSE, 
-            label = "turn-model",
-            dep.var.caption = "", 
-            dep.var.labels.include = FALSE,  
-            type = "latex",
-            star.cutoffs=c(0.05,0.01,0.001), 
-            star.char = c("*", "**", "***"),
-            title="The relationship between bursty overall speech input and concurrent receptive vocabulary size",  
-            digits = 2, 
-            ci = TRUE, 
-            style = "all",
-            order=c(6,1,2,3,4,5),
-            covariate.labels = c("Intercept", "Adult Word Amplitude", "Age (mos)", "Gender:Female", "Mat. Ed.", "Avg. Hourly Words"))
-```
-
-
+The code for this supplementary analysis is not included here because it will not run without the full `everyday_speech.csv` dataframe, which we cannot share because of its size. The `everyday_speech.csv` in `dataframes/` is a small sample (two recordings) that shows the structure of the full dataframe.
