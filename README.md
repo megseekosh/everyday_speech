@@ -57,4 +57,4 @@ Cychosz, M., Romeo, R. R., Edwards, J., & Newman, R. S. (2025). Bursty, irregula
 
 * `burst_detection_v1.py` - script to generate burstiness measures in child-directed speech report in `dataframes/everyday_cds_ods_burstiness.csv`; also generates timeseries plots of burstiness
 
-Oct 2026: cleaned up repo by removing redundant metadata columns and files, using relative filepaths
+Oct 2026: cleaned up repo by removing redundant metadata columns and files, using relative filepaths, fixing typos in codebase, removing non-publisher copies of paper materials to avoid copyright issues.
