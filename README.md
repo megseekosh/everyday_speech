@@ -2,7 +2,7 @@
 
 Code to replicate results from:
 
-Cychosz, M., Romeo, R. R., Edwards, J., & Newman, R. S. (Accepted). Bursty, irregular speech input to preschoolers predicts vocabulary size. *Developmental Science*. 
+Cychosz, M., Romeo, R. R., Edwards, J., & Newman, R. S. (2025). Bursty, irregular speech input to preschoolers predicts vocabulary size. *Developmental Science, 28*(1), e13590. 
 
 # datasets
 #### you'll need to unzip this directory
@@ -57,20 +57,4 @@ Cychosz, M., Romeo, R. R., Edwards, J., & Newman, R. S. (Accepted). Bursty, irre
 
 * `burst_detection_v1.py` - script to generate burstiness measures in child-directed speech report in `dataframes/everyday_cds_ods_burstiness.csv`; also generates timeseries plots of burstiness
 
-* `2_supp_materialsI.Rmd` - script to generate the table of children's language backgrounds in supplementary materials I
-
-* `3_supp_materialsIV.Rmd` - script to replicate the modeling of the relationship between nap durations and vocabulary size in supplementary materials IV
-
-# manuscript
-
-* `manuscript.pdf`
-
-# supplementary materials
-
-* `supp_materialsI.pdf`
-
-* `supp_materialsII.pdf`
-
-* `supp_materialsIII.pdf`
-
-* `supp_materialsIV.pdf`
+Oct 2026: cleaned up repo by removing redundant metadata columns and files, using relative filepaths
