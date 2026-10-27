@@ -152,7 +152,7 @@ speech_df <- pre_speech_romeo %>%
 
 # the LENA dataframes with CDS info
 pre_pre_cds <- read.csv('../dataframes/everyday_cds_ods.csv') %>%
-  #filter(cds_pred=='1') %>% # select only those epochs that are predicted to contain CDS
+  filter(cds_pred=='1') %>% # select only those epochs that are predicted to contain CDS
   filter(corpus!='E' & corpus!='J' & corpus!='A') %>% # remove Jessica's kids and kids w CIs (E & A)
   filter(!child_id %in% c('679LTP1','679LTP2','665LTP1','665LTP2','608LTP1','608LTP2','605LTP2','605LTP1', '079LTP1')) %>% # remove addtl kids w/ CIs
   filter(total_hrs>5) %>% # these recordings and the next child are removed in later processing 
