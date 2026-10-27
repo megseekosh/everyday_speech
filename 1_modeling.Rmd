@@ -216,13 +216,6 @@ num_ctc <- ctc_df %>%
   nrow()
 print(paste('There should be 564 recordings and there are', num_ctc))
 
-num_speech <- speech_df %>% 
-  distinct_at(., vars(child_id), .keep_all = T) %>%
-  #filter(corpus=='R') %>% # to check individual corpora
-  select(child_id) %>%
-  nrow()
-print(paste('There should be 564 recordings and there are', num_speech))
-
 num_cds <- cds_df %>% 
   distinct_at(., vars(child_id), .keep_all = T) %>%
   #filter(corpus=='R') %>% # to check individual corpora
@@ -301,13 +294,6 @@ print(paste('There should be 292 children and there are', num_child))
 speech_df <- speech_df %>%
   filter(total_hrs>5) %>%
   filter(child_id!='015LTP2')
-
-num_speech <- speech_df %>% 
-  distinct_at(., vars(child_id), .keep_all = T) %>%
-  select(child_id) %>%
-  nrow()
-
-print(paste('There should be 555 recordings and there are', num_speech))
 
 # this code was already run above; results in removing 7 recordings 
 #cds_df <- cds_df %>% 
@@ -898,4 +884,4 @@ stargazer(turn_model,
 
 # Supp. Materials III: overall speech analysis
 
-The code for this supplementary analysis is not included here because it will not run without the full `everyday_speech.csv` dataframe, which we cannot share because of its size. The `everyday_speech.csv` in `dataframes/` is a small sample (two recordings) that shows the structure of the full dataframe.
+The code for this supplementary analysis is not included here because it will not run without the full `everyday_speech.csv` dataframe, which is onerous to share because of its size. The `everyday_speech.csv` in `dataframes/` is a small sample (two recordings) that shows the structure of the full dataframe.
