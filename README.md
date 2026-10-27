@@ -57,8 +57,8 @@ Cychosz, M., Romeo, R. R., Edwards, J., & Newman, R. S. (2025). Bursty, irregula
 
 * `burst_detection_v1.py` - script to generate burstiness measures in child-directed speech report in `dataframes/everyday_cds_ods_burstiness.csv`; also generates timeseries plots of burstiness
 
-Note: one p-value, for the burst duration computed likelihood test, was miswritten as <.001. It is 0.04. 
+Note: one p-value, for the burst duration computed likelihood test, was miswritten as <.001. It is 0.04.   
 
-Note on the burst metrics: The burst measures in the published paper were computed from an earlier (2023) build of `everyday_cds_ods.csv` (aka not the one here). That build used a prior generation of the 5-minute epoch exports. These files were stored with version control in Box, but earlier versions were lost in the first author's institutional move, so the exact burst values reported in the _paper_ are only accessible in `burstiness_compiled_results.csv`.  `burstiness_compiled_results.csv` is retained as the dataframe of record for the published burst analyses, but you can't rederive it from the `everyday_cds_ods.csv` shared here. 
+Note on the burst metrics: The burst measures in the published paper were computed from an earlier (2023) build of `everyday_cds_ods.csv` (aka not the one here). That build used a prior generation of the 5-minute epoch exports. These files were stored with version control in Box, but earlier versions were lost in the first author's institutional move, so the exact burst values reported in the _paper_ are only accessible in `burstiness_compiled_results.csv`.  `burstiness_compiled_results.csv` is retained as the dataframe of record for the published burst analyses, but you can't rederive it from the `everyday_cds_ods.csv` shared here. Bursts in the code are also computed as 3SDs from _silence_ instead of the recording's mean.
 
 Oct 2026: cleaned up repo by removing redundant metadata columns and files, using relative filepaths, fixing typos in codebase, removing non-publisher copies of paper materials to avoid copyright issues.
