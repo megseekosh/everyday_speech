@@ -23,11 +23,11 @@ Cychosz, M., Romeo, R. R., Edwards, J., & Newman, R. S. (2025). Bursty, irregula
 
 * `dataframes/everyday_its.csv` - contains metadata about each recording
 
-* `dataframes/everyday_cds_ods.csv` - results from classifier that contains sleep and ODS; used in 1_modeling.Rmd to report statistics about sleep and ODS
+* `dataframes/everyday_cds_ods.csv` - results from classifier that contains sleep and ODS; used in 1_modeling.Rmd to report statistics about sleep and ODS; note that this file comes from a more recent build (post-2023) so it won't correspond to `burstiness_compiled_results.csv`
 
 * `dataframes/sleep_cds_min.csv` - used in `1_modeling.Rmd` to clean naps from the ctc and speech dataframes that are used for supp. materials II and III
 
-* `dataframes/burstiness_compiled_results.csv` - burstiness metrics for every single recording based on CDS (not ODS), after naps have been removed; generated from `burst_detection_v1.py`
+* `dataframes/burstiness_compiled_results.csv` - burstiness metrics for every single recording based on CDS (not ODS), after naps have been removed; generated from `burst_detection_v1.py`; these are the values reported on in the paper
 
 # scripts to process LENA .its files
 #### Note that these scripts were adapted from scripts also located in the [HomeBank Git Repo](https://github.com/HomeBankCode)
@@ -58,5 +58,7 @@ Cychosz, M., Romeo, R. R., Edwards, J., & Newman, R. S. (2025). Bursty, irregula
 * `burst_detection_v1.py` - script to generate burstiness measures in child-directed speech report in `dataframes/everyday_cds_ods_burstiness.csv`; also generates timeseries plots of burstiness
 
 Note: one p-value, for the burst duration computed likelihood test, was miswritten as <.001. It is 0.04. 
+
+Note on the burst metrics: The burst measures in the published paper were computed from an earlier (2023) build of `everyday_cds_ods.csv` (aka not the one here). That build used a prior generation of the 5-minute epoch exports. These files were stored with version control in Box, but earlier versions were lost in the first author's institutional move, so the exact burst values reported in the _paper_ are only accessible in `burstiness_compiled_results.csv`.  `burstiness_compiled_results.csv` is retained as the dataframe of record for the published burst analyses, but you can't rederive it from the `everyday_cds_ods.csv` shared here. 
 
 Oct 2026: cleaned up repo by removing redundant metadata columns and files, using relative filepaths, fixing typos in codebase, removing non-publisher copies of paper materials to avoid copyright issues.
